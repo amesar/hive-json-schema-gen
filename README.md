@@ -165,40 +165,6 @@ Schema
     >,
 ```
 
-
-### Hive identifiers cannot start with underscore
-JSON
-```
-  "_name" : "hello"
-```
-
-Schema
-```
-  `_name`: string
-```
-
-### Numeric JSON attribute names
-
-JSON
-```
-  "sizes" : {
-    "0" : {
-      "width" : 150,
-      "height" : 150,
-      "resize" : 101
-    },
-```
-
-Schema
-```
-  sizes: struct <
-    `0`: struct <
-      width: int,
-      height: int,
-      resize: int
-    >,
-```
-
 ### Polymorphism
 JSON
 ```
