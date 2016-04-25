@@ -47,11 +47,22 @@ object HiveJsonSchemaDriver {
     println("Hive DDL file: "+hgen.outputFilename)
   }
 
+  val reservedKeywordsResource = "reservedKeywords.txt" 
+
   def readReservedKeywordsFile() : Set[String] = {
-    if (!(new File(opts.reservedKeywordsFile)).exists()) {
+    if (opts.reservedKeywordsFile == null) {
+      val url = getClass.getClassLoader.getResource(reservedKeywordsResource)
+      if (url==null) {
+        println("WARNING: Reserved keywords resource does not exist: "+reservedKeywordsResource)
+        return Set[String]()
+      }
+      //println("Reading default reserved keywords resource: "+reservedKeywordsResource)
+      return Source.fromInputStream(url.openStream).getLines().map(x => x.toLowerCase()).toSet
+    } else if (!(new File(opts.reservedKeywordsFile)).exists()) {
       println("WARNING: Reserved keywords file does not exist: "+opts.reservedKeywordsFile)
       return Set[String]()
     }
+    println("Reading reserved keywords file: "+opts.reservedKeywordsFile)
     Source.fromFile(opts.reservedKeywordsFile).getLines().map(x => x.toLowerCase()).toSet
   }
 
@@ -75,7 +86,7 @@ object HiveJsonSchemaDriver {
     var escapeReservedKeywords: Boolean = false
 
     @Parameter(names = Array( "--reservedKeywordsFile" ), description = "Reserved Keywords File", required=false )
-    var reservedKeywordsFile: String = "src/main/resources/reservedKeywords.txt"
+    var reservedKeywordsFile: String = null
 
     @Parameter(names = Array(  "--generateBuildInfo" ), description = "Generate Build Info?", required=false )
     var generateBuildInfo: Boolean = false
