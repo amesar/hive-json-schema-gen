@@ -7,6 +7,10 @@ class HiveSchemaGenerator(table: String, location: String, serde: String, output
   val TAB = "  "
   val outputFilename = if (outputFile==null) table+".ddl" else outputFile
   val pw = new PrintWriter(outputFilename)
+  var numFields = 0
+  var numObjects = 0
+  var numArrays = 0
+  var numScalars = 0
  
   if (buildInfo != null) pw.println("-- "+buildInfo)
 
@@ -22,6 +26,7 @@ class HiveSchemaGenerator(table: String, location: String, serde: String, output
  )
 
   def buildHiveSchema(schema: Schema) {
+    numFields = 0
     val etable = if (isExternalTable) "EXTERNAL " else ""
     pw.println("CREATE "+etable+"TABLE "+table+" (")
     buildObjectDef(schema.root)
@@ -29,9 +34,12 @@ class HiveSchemaGenerator(table: String, location: String, serde: String, output
     pw.println("ROW FORMAT SERDE '"+serde+"'")
     pw.println("LOCATION '"+location+"'")
     pw.close()
+    println("numFields: "+numFields+" numObjects: "+numObjects+" numArrays="+numArrays+" numScalars="+numScalars)
   }
 
   def buildObjectDef(pdef: CompoundDef, indent: String="") {
+    numFields += 1
+    numObjects += 1
 
     for (((fname,fdef),j) <- pdef.fieldDefs.zipWithIndex) {
       val sep = if (j < (pdef.fieldDefs.size-1)) "," else ""
@@ -56,6 +64,8 @@ class HiveSchemaGenerator(table: String, location: String, serde: String, output
   }
 
   def buildScalar(fname: String, fdef: FieldDef, sep: String, indent: String) {
+    numFields += 1
+    numScalars += 1
     val dtypes = fdef.dataTypes
     if (dtypes.size == 0) {
       val htype = "null"
@@ -76,6 +86,8 @@ class HiveSchemaGenerator(table: String, location: String, serde: String, output
   }
 
   def buildArray(fname: String, fdef: FieldDef, sep: String, indent: String) {
+    numFields += 1
+    numArrays += 1
     val adef = fdef.asInstanceOf[ArrayDef]
 
     val dtypes = adef.elementDataTypes
