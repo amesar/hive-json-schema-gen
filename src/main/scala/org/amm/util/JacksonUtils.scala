@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.`type`.TypeReference
 object JacksonUtils {
   private val mapper = new ObjectMapper()
   private val typeReferenceMap = new TypeReference[java.util.Map[String, Object]] {}
+  private val objectWriter = mapper.writerWithDefaultPrettyPrinter()
 
   def toMap(msg: String) : java.util.Map[String, Object] = {
     mapper.readValue(msg.getBytes, typeReferenceMap)
@@ -16,8 +17,11 @@ object JacksonUtils {
     mapper.readValue(bytes, typeReferenceMap)
   }
 
-  def toString(map: Object) : String = {
-    mapper.writeValueAsString(map)
+  def toString(map: Object, pretty: Boolean = false) : String = {
+    if (pretty) 
+      objectWriter.writeValueAsString(map)
+    else
+      mapper.writeValueAsString(map)
   }
 
   def getAsMap(map: java.util.Map[String, Object], field: String) : java.util.Map[String, Object] = {
