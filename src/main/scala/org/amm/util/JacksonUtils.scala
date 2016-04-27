@@ -16,7 +16,7 @@ object JacksonUtils {
     mapper.readValue(bytes, typeReferenceMap)
   }
 
-  def toString(map: java.util.Map[String, Object]) : String = {
+  def toString(map: Object) : String = {
     mapper.writeValueAsString(map)
   }
 
