@@ -25,7 +25,7 @@ object HiveJsonSchemaDriver {
 
   def process() {
     val schema = new Schema()
-    val walker = new Walker()
+    val parser = new JsonParser()
 
     var totalLines = 0
     for (file <- opts.files.asScala) {
@@ -34,7 +34,7 @@ object HiveJsonSchemaDriver {
       val istream = if (file.endsWith(".gz")) new GZIPInputStream(bistream) else bistream
       for ((line,j) <- Source.fromInputStream(istream).getLines().zipWithIndex) {
         if (j> 0 && j%opts.logmod==0) println("  Processing line "+j+" of "+file);
-        walker.walk(JacksonUtils.toMap(line),schema)
+        parser.parse(JacksonUtils.toMap(line),schema)
         totalLines += 1
       }
     }
