@@ -4,10 +4,10 @@ import java.io._
 import java.util.zip.GZIPInputStream
 import scala.io.Source
 import scala.collection.JavaConverters._
-import org.amm.util.JacksonUtils
 import com.beust.jcommander.{JCommander, Parameter}
 
 object HiveJsonSchemaDriver {
+  def parser = new JsonParser()
 
   def main(args: Array[String]) {
     new JCommander(opts, args.toArray: _*)
@@ -25,7 +25,7 @@ object HiveJsonSchemaDriver {
 
   def process() {
     val schema = new Schema()
-    val parser = new JsonParser()
+    val walker = new Walker()
 
     var totalLines = 0
     for (file <- opts.files.asScala) {
@@ -34,7 +34,7 @@ object HiveJsonSchemaDriver {
       val istream = if (file.endsWith(".gz")) new GZIPInputStream(bistream) else bistream
       for ((line,j) <- Source.fromInputStream(istream).getLines().zipWithIndex) {
         if (j> 0 && j%opts.logmod==0) println("  Processing line "+j+" of "+file);
-        parser.parse(JacksonUtils.toMap(line),schema)
+        walker.walk(parser.parse(line),schema)
         totalLines += 1
       }
     }
